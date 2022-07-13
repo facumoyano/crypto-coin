@@ -8,7 +8,7 @@ const SelectButton = ({ children, selected, onClick }) => {
             sx={{
                 border: "1px solid gold",
                 borderRadius: 5,
-                padding: 4,
+                padding: 2,
 
                 fontFamily: "Montserrat",
                 cursor: "pointer",

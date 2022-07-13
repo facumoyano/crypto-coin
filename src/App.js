@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
+import Alert from './components/Alert';
 import Header from './components/Header';
 import CoinPage from './pages/CoinPage';
 import HomePage from './pages/HomePage';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/coins/:id" element={<CoinPage />} />
         </Routes>
       </Box>
+      <Alert />
     </BrowserRouter>
   );
 }

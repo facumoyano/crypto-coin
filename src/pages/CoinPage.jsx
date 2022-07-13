@@ -1,4 +1,4 @@
-import { LinearProgress, Typography, Box } from "@mui/material";
+import { LinearProgress, Typography, Box, Button } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -6,13 +6,15 @@ import { SingleCoin } from "../api/api";
 import CoinInfo from "../components/CoinInfo";
 import useCrypto from "../hooks/useCrypto";
 import { useTheme } from "@mui/material/styles";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 
 const CoinPage = () => {
     const { id } = useParams();
     const [coin, setCoin] = useState();
     const theme = useTheme();
 
-    const { moneda, symbol } = useCrypto();
+    const { moneda, symbol, user, watchlist, setAlert } = useCrypto();
 
     const fetchCoin = async () => {
         const { data } = await axios.get(SingleCoin(id));
@@ -28,6 +30,56 @@ const CoinPage = () => {
     function numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+
+    const inWatchList = watchlist.includes(coin?.id);
+
+    const addToWatchList = async () => {
+        const coinRef = doc(db, "watchlist", user.uid);
+
+        try {
+            await setDoc(coinRef, {
+                coins: watchlist ? [...watchlist, coin.id] : [coin.id],
+            });
+
+            setAlert({
+                open: true,
+                message: `${coin.name} Agregada exitosamente!`,
+                type: "success",
+            });
+        } catch (error) {
+            setAlert({
+                open: true,
+                message: error.message,
+                type: "error",
+            });
+        }
+    };
+
+    const removeFromWatchList = async () => {
+        const coinRef = doc(db, "watchlist", user.uid);
+
+        try {
+            await setDoc(
+                coinRef,
+                {
+                    coins: watchlist.filter((watch) => watch !== coin?.id),
+                },
+                { merge: "true" }
+            );
+
+            setAlert({
+                open: true,
+                message: `${coin.name} Eliminada exitosamente!`,
+                type: "success",
+            });
+        } catch (error) {
+            setAlert({
+                open: true,
+                message: error.message,
+                type: "error",
+            });
+        }
+    };
 
     if (!coin) return <LinearProgress style={{ backgroundColor: "gold" }} />;
 
@@ -161,6 +213,33 @@ const CoinPage = () => {
                             M
                         </Typography>
                     </span>
+                    {user && (
+                        <Button
+                            sx={{
+                                width: "100%",
+                                height: 40,
+                                backgroundColor: inWatchList
+                                    ? "#ff0000"
+                                    : "#eebc1d",
+                                color: "#14161a",
+                                marginTop: 4,
+                                fontWeight: "bold",
+                                fontSize: 16,
+                                "&:hover": {
+                                    backgroundColor: "#eebc1b",
+                                },
+                            }}
+                            onClick={
+                                inWatchList
+                                    ? removeFromWatchList
+                                    : addToWatchList
+                            }
+                        >
+                            {inWatchList
+                                ? "Eliminar de la lista"
+                                : "Agregar a la lista"}
+                        </Button>
+                    )}
                 </Box>
             </Box>
             <CoinInfo coin={coin} />

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { CoinList } from "../api/api";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useCrypto from "../hooks/useCrypto";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -20,21 +18,12 @@ import {
 } from "@mui/material";
 
 const CoinsTable = () => {
-    const [coins, setCoins] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
 
     const navigate = useNavigate();
 
-    const { moneda, symbol } = useCrypto();
-
-    const fetchCoins = async () => {
-        setLoading(true);
-        const { data } = await axios(CoinList(moneda));
-        setCoins(data);
-        setLoading(false);
-    };
+    const { moneda, symbol, coins, loading, fetchCoins } = useCrypto();
 
     useEffect(() => {
         fetchCoins();
